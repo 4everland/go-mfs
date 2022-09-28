@@ -157,6 +157,15 @@ func (d *Directory) childNode(name string) (FSNode, error) {
 func (d *Directory) cacheNode(name string, nd ipld.Node) (FSNode, error) {
 	switch nd := nd.(type) {
 	case *dag.ProtoNode:
+		if len(nd.Data()) == 0 {
+			nfi, err := NewFile(name, nd, d, d.dagService)
+			if err != nil {
+				return nil, err
+			}
+			d.entriesCache[name] = nfi
+			return nfi, nil
+		}
+		
 		fsn, err := ft.FSNodeFromBytes(nd.Data())
 		if err != nil {
 			return nil, err
